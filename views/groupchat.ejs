@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방 기준 채팅하기</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>채팅방 기준 채팅하기</h1>
+    채팅방 이름 : <input type="text" id="channelId" value="room1">
+    <button id="btnEntry">입장하기</button>
+    <button id="btnExit">퇴장하기</button>
+    <br>
+
+
+    대화명 : <input type="text" id="nickName" value="지수"><br>
+    메시지 : <input type="text" id="message"><br>
+    <input type="button" id="btnSend" value="전송">
+    <hr>
+    <input type="button" id="btnClose" value="채팅종료">
+    <ul id="chatHistory">
+    </ul>
+    <script>
+        let socket = io.connect('/');
+
+        $('#btnEntry').click(function(){
+            let channelId = $('#channelId').val();
+            let nickName = $('#nickName').val();
+            socket.emit('entry', channelId, nickName);
+        });
+        socket.on('entryOk', function(data){
+            $('#chatHistory').append('<li>'+data+'</li>');
+        });
+
+        $('#btnExit').click(function(){
+            let channelId = $('#channelId').val();
+            let nickName = $('#nickName').val();
+            socket.emit('exit', channelId, nickName);
+        });
+        socket.on('leaveOk', function(data){
+            $('#chatHistory').append('<li>'+data+'</li>');
+        });
+
+        $('#btnClose').click(function(){
+            socket.emit('goodbye');
+        });
+
+        $('#btnSend').click(function(){
+            let msg = $('#message').val();
+            let channelId = $('#channelId').val();
+            let nickName = $('#nickName').val();
+
+            let jsonMsgData = {
+                "channelId": channelId,
+                "nickName": nickName,
+                "msg": msg
+            }
+            socket.emit("send", jsonMsgData);
+        });
+        socket.on('receiveGroupMsg',function (jsonMsgData){
+            $('#chatHistory').append(`<li>${jsonMsgData.nickName} : ${jsonMsgData.msg}</li>`)
+        })
+        socket.on('clientEvent2', function(nickName, msg){
+            $('#chatHistory').append(`<li>${nickName} : ${msg}</li>`);
+        });
+    </script>
+
+</body>
+</html>

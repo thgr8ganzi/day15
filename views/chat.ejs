@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>chat</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<h1>소켓 서버와 연결된 모든 사용자간 채팅하기</h1>
+
+대화명 : <input type="text" id="nickName" value="사람"><br>
+메시지 : <input type="text" id="message"><br>
+<input type="button" id="btnSend" value="전송">
+<ul id="chatHistory">
+
+</ul>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // io.connect('소켓 서버의 주소')를 호출하면 서버소켓 서버와 연결을 시도하고 연결이 완료 된다.
+    let socket = io.connect('/')
+
+    $('#btnSend').click(function() {
+        let nickName = $('#nickName').val()
+        let message = $('#message').val()
+        let msgData = `${nickName} : ${message}`
+
+        // debugger;
+        // socket.emit('broadcast', msgData)
+        // socket.emit('test1', nickName, message)
+        let jsonData = {
+            "nickName":nickName,
+            "msg":message
+        }
+        socket.emit('test2', jsonData)
+    })
+
+    socket.on('receiveAll',function (data){
+        $('#chatHistory').append(`<li>${data}</li>`)
+    })
+    socket.on('clientEvent1',function (data1, data2){
+        $('#chatHistory').append(`<li>${data1} >> ${data2}</li>`)
+    })
+    socket.on('clientEvent2',function (nickName, msg){
+        $('#chatHistory').append(`<li>${nickName} || ${msg}</li>`)
+    })
+</script>
+</body>
+</html>
