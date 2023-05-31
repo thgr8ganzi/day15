@@ -40,7 +40,7 @@ module.exports = (server) => {
         socket.on('exit', async (channelId,nickName) => {
             socket.leave(channelId);
             socket.emit('leaveOk',`채팅방을 퇴장하셨습니다`);
-            socket.to(channelId).emit('leaveOk',`${nickName}님이 입장하셨습니다.`);
+            socket.to(channelId).emit('leaveOk',`${nickName}님이 퇴장하셨습니다.`);
         })
         // 연결된 소켓 제거
         socket.on('goodbye',async ()=>{
